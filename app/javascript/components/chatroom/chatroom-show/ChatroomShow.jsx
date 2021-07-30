@@ -87,7 +87,6 @@ export default function ChatroomShow(props) {
           body: JSON.stringify({ message, chatroomId, userId: currentUser.id }),
         });
         setMessage('');
-        console.log('response status', response.status);
       } catch (e) {
         console.log(e);
       }
@@ -95,8 +94,6 @@ export default function ChatroomShow(props) {
       setInputError(true);
     }
   };
-
-  console.log(currentChatroom)
 
   return (
     <div className={classes.root}>
