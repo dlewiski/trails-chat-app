@@ -1,6 +1,9 @@
 import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
+  messageAndUserDisplay: {
+    display: 'flex',
+  },
   messageDisplay: {
     margin: '5px 0',
     whiteSpace: 'nowrap',

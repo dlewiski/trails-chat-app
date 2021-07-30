@@ -25,11 +25,20 @@ class Api::MessagesController < ApplicationController
     message = Message.new({content: params[:message], chatroom_id: params[:chatroomId].to_i, user_id: params[:userId].to_i})
 
     if message.save
+      user = message.user
+      message_reactions = message.message_reactions
+
+      message_reactions.map {|reaction| {reaction: reaction, user: reaction.user}}
       updatedChatroom = Chatroom.find(params[:chatroomId]) 
       ActionCable.server.broadcast(
       "chatroom_#{params[:chatroomId]}",
-      newMessage: message,
-      updatedChatroom: updatedChatroom)
+      {
+        newMessage: {message: message, user: user},
+        messageReactions: message_reactions,
+        user: user,
+        updatedChatroom: updatedChatroom
+      }
+    )
     end
   end
 

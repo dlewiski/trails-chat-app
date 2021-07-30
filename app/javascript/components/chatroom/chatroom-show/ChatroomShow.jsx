@@ -16,6 +16,7 @@ import MessageDisplay from '../message-display/MessageDisplay';
 
 export default function ChatroomShow(props) {
   const { currentUser } = props;
+  const [activeUsers, setActiveUsers] = useState([]);
   const [currentChatroom, setCurrentChatroom] = useState({
     room: {},
     users: [],
@@ -30,11 +31,16 @@ export default function ChatroomShow(props) {
   useEffect(() => {
     async function getChatroom() {
       try {
-        const response = await fetch(`${API_ROOT}/chatrooms/${chatroomId}`);
+        const response = await fetch(`${API_ROOT}/chatrooms/${chatroomId}`, {
+          headers: {
+            UserId: currentUser.id,
+          },
+        });
         const chatroomData = await response.json();
-        const { users = [], messages = [] } = chatroomData;
+        const { connectedUsers = [], messages = [], chatroom } = chatroomData;
         setMessagesToShow(messages);
-        setCurrentChatroom({ room: chatroomData, users, messages });
+        setActiveUsers(connectedUsers);
+        setCurrentChatroom({ room: chatroom, users: connectedUsers, messages });
       } catch (e) {
         console.log(e);
       }
@@ -42,7 +48,7 @@ export default function ChatroomShow(props) {
     getChatroom();
 
     const messagesChannel = consumer.subscriptions.create(
-      { channel: 'MessagesChannel', chatroomId },
+      { channel: 'MessagesChannel', chatroomId, userId: currentUser.id },
       {
         connected() {
           // Called when the subscription is ready for use on the server
@@ -55,10 +61,21 @@ export default function ChatroomShow(props) {
 
         received(data) {
           // Called when there's incoming data on the websocket for this channel
-
-          const { newMessage } = data;
-
-          setMessagesToShow(prevState => [...prevState, newMessage]);
+          const { newMessage, connectedUser, response } = data;
+          if (connectedUser) {
+            setActiveUsers(prevState => [...prevState, connectedUser]);
+          }
+          if (newMessage) {
+            setMessagesToShow(prevState => [...prevState, newMessage]);
+          }
+          if (response) {
+            setActiveUsers(prevState => {
+              const updatedActiveUsers = prevState.filter(
+                user => user.id !== currentUser.id,
+              );
+              return updatedActiveUsers;
+            });
+          }
         },
       },
     );
@@ -79,7 +96,7 @@ export default function ChatroomShow(props) {
     event.preventDefault();
     if (message.length > 0) {
       try {
-        const response = await fetch(`${API_ROOT}/messages`, {
+        await fetch(`${API_ROOT}/messages`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -97,7 +114,9 @@ export default function ChatroomShow(props) {
 
   return (
     <div className={classes.root}>
-      <h2>{currentChatroom.room.name}</h2>
+      <h2>
+        {currentChatroom.room.name} - {activeUsers.length} currently in chatroom
+      </h2>
       <div className={classes.messageDisplayRoot}>
         <div className={classes.messageDisplayContent}>
           {messagesToShow.length === 0 ? (
@@ -105,9 +124,12 @@ export default function ChatroomShow(props) {
           ) : (
             messagesToShow.map((messageToShow, index) => (
               <MessageDisplay
-                messageObj={messageToShow}
-                messageId={messageToShow.id}
-                key={`${currentChatroom.room.name}-${messageToShow.id + index}`}
+                messageObj={messageToShow.message}
+                messageId={messageToShow.message.id}
+                username={messageToShow.user.username}
+                key={`${currentChatroom.room.name}-${
+                  messageToShow.message.id + index
+                }`}
               />
             ))
           )}

@@ -1,12 +1,13 @@
 /* eslint-disable react/prop-types */
 /* eslint radix: ["error", "as-needed"] */
 import React, { useState, useEffect } from 'react';
+import { Typography } from '@material-ui/core';
 import consumer from '../../../channels/consumer';
 import { API_ROOT } from '../../constants';
 import useStyles from './styles';
 
 export default function MessageDisplay(props) {
-  const { messageObj, messageId } = props;
+  const { messageObj, messageId, username } = props;
   const reactionList = ['!!', '!?', '??', '<3', ':(', ';)'];
   const [currentReaction, setCurrentReaction] = useState('');
   const [showReactionList, setShowReactionList] = useState({
@@ -74,14 +75,17 @@ export default function MessageDisplay(props) {
 
   return (
     <div>
-      <button
-        type="button"
-        className={classes.messageDisplay}
-        onClick={event => handleMessageClick(event)}
-        id={messageObj.id}
-      >
-        {messageObj.content}
-      </button>
+      <div className={classes.messageAndUserDisplay}>
+        <button
+          type="button"
+          className={classes.messageDisplay}
+          onClick={event => handleMessageClick(event)}
+          id={messageObj.id}
+        >
+          {messageObj.content}
+        </button>
+      </div>
+      <Typography>-{username}</Typography>
       {currentReaction.length !== 0 && (
         <p className={classes.currentReactionButton}>{currentReaction}</p>
       )}

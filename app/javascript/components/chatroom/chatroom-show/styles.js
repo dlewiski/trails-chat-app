@@ -12,8 +12,8 @@ const useStyles = makeStyles(() => ({
   },
   messageDisplayContent: {
     padding: '0 30px',
-    maxHeight: '500px',
-    maxWidth: '350px',
+    maxHeight: '600px',
+    maxWidth: '550px',
     minWidth: '250px',
     overflowY: 'auto',
     display: 'flex',

@@ -12,5 +12,21 @@ class MessagesChannel < ApplicationCable::Channel
 
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
+    user = User.find(params[:userId])
+    user.chatroom_id = nil
+    response = {}
+
+    if user.save 
+      response = {message: 'Successfully removed user from chatroom', user: user}
+    else
+      response = {message: 'Error saving update user', user: user}
+    end
+    
+    ActionCable.server.broadcast(
+      "chatroom_#{params[:chatroomId]}",
+      {
+        response: response
+      }
+    )
   end
 end

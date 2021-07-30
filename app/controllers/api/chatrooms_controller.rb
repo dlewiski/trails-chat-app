@@ -12,7 +12,24 @@ class Api::ChatroomsController < ApplicationController
   # GET /chatrooms/1 or /chatrooms/1.json
   def show
     chatroom = Chatroom.find(params[:id]) 
-    render json: chatroom, include: :messages
+    connected_user = User.find(request.headers['UserId'].to_i)
+    connected_user.chatroom_id = chatroom.id
+    if connected_user.save
+      connected_users = chatroom.users
+    end
+
+    messages_with_user = chatroom.messages.map {|message| {message: message, user: message.user}}
+
+    chatroom_with_messages = {chatroom: chatroom, messages: messages_with_user, connectedUsers: connected_users}
+
+     ActionCable.server.broadcast(
+      "chatroom_#{params[:id]}",
+      {
+        connectedUser: connected_user
+      }
+    )
+    
+    render json: chatroom_with_messages
   end
 
   # POST /chatrooms or /chatrooms.json
@@ -30,14 +47,13 @@ class Api::ChatroomsController < ApplicationController
 
   # PATCH/PUT /chatrooms/1 or /chatrooms/1.json
   def update
-    respond_to do |format|
-      if @chatroom.update(chatroom_params)
-        format.html { redirect_to @chatroom, notice: "Chatroom was successfully updated." }
-        format.json { render :show, status: :ok, location: @chatroom }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @chatroom.errors, status: :unprocessable_entity }
-      end
+    user = User.find(request.headers['UserId'])
+    user.chatroom_id = nil
+
+    if user.save 
+      render json: {message: 'Successfully removed user from chatroom', user: user}
+    else
+      render json: {message: 'Error saving update user', user: user}
     end
   end
 
