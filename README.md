@@ -1,6 +1,9 @@
 # React Rails Chat App
 
-### User Stories/Features
+## Summary
+https://secret-retreat-97516.herokuapp.com/
+
+## User Stories/Features
 1. When users land at the app, they are presented with a single input form prompting them to create an alias for use in the chatrooms. If the alias is not unique among the users currently using the chat rooms, an error appears.
 
 2. Once users have created an alias it is displayed in the upper left-hand corner of the app. Users then see a list of existing chatrooms.
