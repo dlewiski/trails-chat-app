@@ -28,23 +28,34 @@ export default function ChatroomShow(props) {
   const { chatroomId } = useParams();
   const classes = useStyles();
 
-  useEffect(() => {
-    async function getChatroom() {
-      try {
-        const response = await fetch(`${API_ROOT}/chatrooms/${chatroomId}`, {
-          headers: {
-            UserId: currentUser.id,
-          },
-        });
-        const chatroomData = await response.json();
-        const { connectedUsers = [], messages = [], chatroom } = chatroomData;
-        setMessagesToShow(messages);
-        setActiveUsers(connectedUsers);
-        setCurrentChatroom({ room: chatroom, users: connectedUsers, messages });
-      } catch (e) {
-        console.log(e);
-      }
+  async function getChatroom() {
+    try {
+      const response = await fetch(`${API_ROOT}/chatrooms/${chatroomId}`, {
+        headers: {
+          UserId: currentUser.id,
+        },
+      });
+      const chatroomData = await response.json();
+      const { connectedUsers = [], messages = [], chatroom } = chatroomData;
+      setMessagesToShow(messages);
+      setActiveUsers(connectedUsers);
+      setCurrentChatroom({
+        room: chatroom,
+        users: connectedUsers,
+        messages,
+      });
+    } catch (e) {
+      console.log(e);
     }
+  }
+
+  const handleActiveUserRemoval = () => {
+    setActiveUsers(prevState => {
+      return prevState.filter(user => user.id !== currentUser.id);
+    });
+  };
+
+  useEffect(() => {
     getChatroom();
 
     const messagesChannel = consumer.subscriptions.create(
@@ -69,12 +80,7 @@ export default function ChatroomShow(props) {
             setMessagesToShow(prevState => [...prevState, newMessage]);
           }
           if (response) {
-            setActiveUsers(prevState => {
-              const updatedActiveUsers = prevState.filter(
-                user => user.id !== currentUser.id,
-              );
-              return updatedActiveUsers;
-            });
+            handleActiveUserRemoval();
           }
         },
       },

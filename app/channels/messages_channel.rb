@@ -21,7 +21,7 @@ class MessagesChannel < ApplicationCable::Channel
     else
       response = {message: 'Error saving update user', user: user}
     end
-    
+
     ActionCable.server.broadcast(
       "chatroom_#{params[:chatroomId]}",
       {
@@ -30,3 +30,4 @@ class MessagesChannel < ApplicationCable::Channel
     )
   end
 end
+ 
