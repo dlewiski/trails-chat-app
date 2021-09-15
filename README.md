@@ -21,27 +21,3 @@ https://secret-retreat-97516.herokuapp.com/
 8. In the chatroom, users will see the other users’ alias next to the messages they send.
 
 9. Users can leave a chatroom
-
-
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-- Ruby version
-
-- System dependencies
-
-- Configuration
-
-- Database creation
-
-- Database initialization
-
-- How to run the test suite
-
-- Services (job queues, cache servers, search engines, etc.)
-
-- Deployment instructions
-
-- ...
